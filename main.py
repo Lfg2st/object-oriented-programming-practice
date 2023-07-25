@@ -1,11 +1,7 @@
-from tabulate import tabulate
 import csv
-
-
 class Item:
-    pay_rate = 0.8  # The pay rate after 20% discount
-    all = []  # Class-level list to store all instances of the Item class
-
+    pay_rate = 0.8 # The pay rate after 20% discount
+    all = []
     def __init__(self, name: str, price: float, quantity=0):
         # Run validations to the received arguments
         assert price >= 0, f"Price {price} is not greater than or equal to zero!"
@@ -17,44 +13,36 @@ class Item:
         self.quantity = quantity
 
         # Actions to execute
-        Item.all.append(self)  # Add the current instance to the class-level list 'all'
+        Item.all.append(self)
 
     def calculate_total_price(self):
-        return (
-            self.price * self.quantity
-        )  # Calculate and return the total price of the item
+        return self.price * self.quantity
 
     def apply_discount(self):
-        self.price = self.price * self.pay_rate  # Apply discount to the item's price
+        self.price = self.price * self.pay_rate
 
     def __repr__(self):
-        return f"Item('{self.name}', {self.price}, {self.quantity})"  # String representation of the Item instance
+        return f"Item('{self.name}', {self.price}, {self.quantity})"
+    
+    # instantiating from csv using a class method (a method which is not bound to a particular class but the class itself - this allows us to do class level modifications and capturing attributes)
+    @classmethod
+    def instantiate_from_csv(cls):
+        datalist = []
+        with open('shop-info.csv', 'r') as f:
+            csv_reader = csv.DictReader(f)
+            items = list(csv_reader)
+        for item in items:
+            Item(
+                name = item['name'],
+                price = float(item['price']),
+                quantity = float(item['quantity'])
+            )
 
-
-# Create instances of the Item class
-item1 = Item("Phone", 100, 1)
-item2 = Item("Laptop", 1000, 3)
-item3 = Item("Cable", 10, 5)
-item4 = Item("Mouse", 50, 5)
-item5 = Item("Keyboard", 75, 5)
-
-
-def create_table(to_csv=False, path=None):
-    headers = ["Name", "Price", "Quantity"]
-    rows = []
-    for instance in Item.all:
-        print(
-            instance
-        )  # Print each instance (Note: This is not needed for creating the table)
-        rows.append([instance.name, instance.price, instance.quantity])
-    if to_csv:
-        with open(path, "w", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(headers)
-            writer.writerows(rows)
-    return tabulate(rows, headers=headers, tablefmt="simple_outline")
-
-
-print(
-    create_table(to_csv=True, path="shop-info.csv")
-)  # Print the table of items with their names, prices, and quantities
+    @staticmethod #class reference is not the first argument, one can use it just like any another function
+    def is_integer(num):
+        if num % 1 == 0:
+            True
+        else:
+            False
+Item.instantiate_from_csv()
+print(Item.all)
